@@ -1,34 +1,35 @@
-pipeline{
+pipeline {
     agent any
-    tools{
-        maven "Maven-3.6"
-    }
-    stages{ 
-        stage("build jar") {
-            steps{
-                script{
-                    echo "################ Building the application #################"
-                    sh 'mvn package'
+    stages {
+        stage('test') {
+            steps {
+                script {
+                    echo "########## testing the application ########"
+                    echo "#####===== this is branch $BRANCH_NAME ====####"
                 }
             }
         }
-        stage("build image") {
-            steps {
-                script  {
-                    echo "################ Building docker image #################"
-                    withCredentials([usernamePassword(credentialsId: 'Docker-hub-repo', passwordVariable: 'PASS',usernameVariable: 'USER')]) 
-                        {
-                            sh 'docker build -t ahmedsamir98/my-repo:jma-2.0 .'
-                            sh "echo $PASS | docker login -u $USER --password-stdin"
-                            sh 'docker push ahmedsamir98/my-repo:jma-2.0'
-                        }
+        stage('build') {
+            when{
+                expression {
+                    BRANCH_NAME == 'master'
                 }
             }
-        } 
-        stage("deploy") {
-            steps{
-                script{
-                    echo "################ Deploying the application #################"
+            steps {
+                script {
+                    echo "########## building the application ########"
+                }
+            }
+        }
+        stage('deploy') {
+            when{
+                expression {
+                    BRANCH_NAME == 'master'
+                }
+            }
+            steps {
+                script {
+                    echo "########## seploying the application ########"
                 }
             }
         }
